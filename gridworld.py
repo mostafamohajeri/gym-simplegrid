@@ -1,16 +1,15 @@
 import gym
-import gym_simplegrid
 import numpy as np
+import matplotlib.pyplot as plt
+import gym_simplegrid
 
 env = gym.make('SimpleGrid-8x8-v0')
-
-
 
 nb_states = env.observation_space.n
 nb_actions = env.action_space.n
 qtable = np.zeros((nb_states, nb_actions))
 
-# Hyperparameters
+# Hyper-parameters
 episodes = 1000  # Total number of episodes
 alpha = 0.5  # Learning rate
 gamma = 0.9  # Discount factor
@@ -18,24 +17,24 @@ epsilon = 1.0  # Amount of randomness in the action selection
 epsilon_decay = 0.001  # Fixed amount to decrease
 
 # List of outcomes to plot
-outcomes = []
+outcomes = np.zeros(episodes)
 
 # print('Q-table before training:')
 # print(qtable)
 
 
-for _ in range(episodes):
+for e in range(episodes):
     state, info = env.reset()
     done = False
 
     # By default, we consider our outcome to be a failure
-    outcomes.append("Failure")
-
+    outcomes[e] = 0
+    steps = 0
     # Until the agent gets stuck in a hole or reaches the goal, keep training it
-    while not done:
+    while not done and steps < 200:
         # Generate a random number between 0 and 1
         rnd = np.random.random()
-
+        steps += 1
         # If random number < epsilon, take a random action
         if rnd < epsilon:
             action = env.action_space.sample()
@@ -54,20 +53,25 @@ for _ in range(episodes):
         state = new_state
 
         # If we have a reward, it means that our outcome is a success
-        if done:
-            outcomes[-1] = "Success"
 
-    # Update epsilon
+        outcomes[e] = outcomes[e] + 1
+
     epsilon = max(epsilon - epsilon_decay, 0)
 
 
-print(qtable)
 
-## NOW EXECUTE FROM THE TABLE
+    # Plot outcomes
+plt.figure(figsize=(12, 5))
+plt.xlabel("Run number")
+plt.ylabel("Outcome")
+ax = plt.gca()
+ax.set_facecolor('#efeeea')
+plt.bar(range(len(outcomes)), outcomes, color="#0A047A", width=1.0)
+plt.show()
+
+# NOW EXECUTE FROM THE TABLE
 state, info = env.reset()
 done = False
-
-
 
 while not done:
     # Choose the action with the highest value in the current state
@@ -83,11 +87,6 @@ while not done:
     # Update our current state
     state = new_state
     env.render()
-
-    # If we have a reward, it means that our outcome is a success
-    if reward:
-        outcomes[-1] = "Success"
-        print("Success in", iter)
 
 
 env.close()
