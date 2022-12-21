@@ -468,6 +468,7 @@ class SimpleGrid:
 
         if agent_dir is not None:
             fill_coords(img, point_in_circle(0.5, 0.5, 0.31), COLORS['yellow'])
+
             
         # Highlight the cell if needed
         if highlight:
@@ -512,7 +513,12 @@ class SimpleGrid:
             for i in range(0, self.width):
                 cell = self.get(i, j)
 
-                agent_here = np.array_equal(agent_pos, (i, j))
+                agent_here = False
+
+                for agent, pos in agent_pos.items():
+                    if np.array_equal(pos, (i, j)):
+                        agent_here = True
+
                 tile_img = SimpleGrid.render_tile(
                     cell,
                     agent_dir=agent_dir if agent_here else None,

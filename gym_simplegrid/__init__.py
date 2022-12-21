@@ -14,6 +14,13 @@ register(
 )
 
 register(
+    id='MASSimpleGrid-8x8-v0',
+    entry_point='gym_simplegrid.envs:MASSimpleGridEnv',
+    max_episode_steps=200,
+    kwargs={'map_name': '8x8'},
+)
+
+register(
     id='SimpleGrid-4x4-v0',
     entry_point='gym_simplegrid.envs:SimpleGridEnv',
     max_episode_steps=200,
