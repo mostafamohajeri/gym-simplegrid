@@ -6,7 +6,7 @@ from typing import Optional
 
 import numpy as np
 
-from gym_simplegrid.grid import SimpleGrid, Wall, Goal, Start
+from gym_simplegrid.grid import SimpleGrid, Wall, Goal, Start, Lava
 from gym_simplegrid.window import Window
 
 from gym import Env, spaces, utils
@@ -15,13 +15,13 @@ from gym.envs.toy_text.utils import categorical_sample
 MAPS = {
     "4x4": ["SEEE", "EWEW", "EEEW", "WEEG"],
     "8x8": [
-        "SEEEEEEE",
+        "SEEELLEE",
         "EEEEEEEE",
-        "EEEWEEEE",
-        "EEEEEWEE",
+        "EELWEEEE",
+        "EELEEWEE",
         "EEEWEEEE",
         "EWWEEEWE",
-        "EWEEWEWE",
+        "EWEEWLWE",
         "EEEWEEEG",
     ],
 }
@@ -31,6 +31,7 @@ REWARD_MAP = {
         b'S': 0.0,
         b'W': -1.0,
         b'G': 1.0,
+        b'L': -5.0
     }
 
 
@@ -219,6 +220,8 @@ class SimpleGridEnv(Env):
                     grid.set(col, row, Goal())
                 elif letter == b'W':
                     grid.set(col, row, Wall(color='black'))
+                elif letter == b'L':
+                    grid.set(col, row, Lava())
                 else:
                     grid.set(col, row, None)
         return grid
@@ -291,10 +294,18 @@ class SimpleGridEnv(Env):
         Compute next state, reward and done when starting at (row, col)
         and taking the action action a.
         """
+
         newrow, newcol = self.__to_next_xy(row, col, a)
         newstate = self.__to_s(newrow, newcol)
         newletter = self.desc[newrow, newcol]
-        done = bytes(newletter) in b"GW"
+
+        if bytes(newletter) in b"W":
+            newstate = self.__to_s(row,col)
+            newletter = self.desc[row, col]
+
+
+        done = bytes(newletter) in b"G"
+
         reward = self.reward_map[newletter]
         return newstate, reward, done
 
@@ -319,8 +330,10 @@ class SimpleGridEnv(Env):
                 for a in range(nA):
                     li = P[s][a]
                     letter = self.desc[row, col]
-                    if letter in b"GW":
-                        li.append((1.0, s, 0, True)) #@NOTE: is reward=0 correct? Probably the value doesn't matter.
+                    if letter in b"G":
+                        li.append((1.0, s, 0, False)) #@NOTE: is reward=0 correct? Probably the value doesn't matter.
+                    elif letter in b"W":
+                        li.append((1.0, s, 0, False))
                     else:
                         if self.p_noise:
                             li.append( (1-self.p_noise, *self.__transition(row, col, a)) )
@@ -336,13 +349,13 @@ class SimpleGridEnv(Env):
         p, s, r, d = transitions[i]
         self.s = s
         self.lastaction = a
-        return (int(s), r, d, {"prob": p})
+        return (int(s), r, d, d , {"prob": p})
 
     def reset(
         self,
         *,
         seed: Optional[int] = None,
-        return_info: bool = False,
+        return_info: bool = True,
         options: Optional[dict] = None,
     ):
         super().reset(seed=seed)

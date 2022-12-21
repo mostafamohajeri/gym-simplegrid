@@ -25,7 +25,8 @@ class Window:
 
         # Show the env name in the window title
         #@TODO: Soon, this will be deprecated
-        self.fig.canvas.set_window_title(title)
+        # self.fig.canvas.set_window_title(title)
+
         
         # Turn off x/y axis numbering/ticks
         self.ax.xaxis.set_ticks_position('none')
@@ -88,7 +89,7 @@ class Window:
         # Show the plot
         # In non-interative mode, this enters the matplotlib event loop
         # In interactive mode, this call does not block
-        plt.show()
+        plt.draw()
 
     def close(self):
         """
