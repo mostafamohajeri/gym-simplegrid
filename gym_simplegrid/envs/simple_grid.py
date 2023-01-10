@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import string
 from contextlib import closing
 from io import StringIO
 from typing import Optional
@@ -27,11 +28,11 @@ MAPS = {
 }
 
 REWARD_MAP = {
-        b'E': 0.0,
-        b'S': 0.0,
-        b'W': -1.0,
-        b'G': 1.0,
-        b'L': -5.0
+        b"E": 0.0,
+        b"S": 0.0,
+        b"W": -1.0,
+        b"G": 1.0,
+        b"L": -5.0
     }
 
 
@@ -147,7 +148,22 @@ class SimpleGridEnv(Env):
         # Initialise action and state spaces
         self.nA = 4
         self.nS = self.nrow * self.ncol
-        self.observation_space = spaces.Discrete(self.nS)
+
+        my_spaces = {
+            'position': spaces.Discrete(self.nS),
+            'local_observation': spaces.Tuple(
+                [
+                    spaces.Text(min_length=1, max_length=1),
+                    spaces.Text(min_length=1, max_length=1),
+                    spaces.Text(min_length=1, max_length=1),
+                    spaces.Text(min_length=1, max_length=1),
+                    spaces.Text(min_length=1, max_length=1)
+                ]
+            )
+        }
+
+        self.observation_space = spaces.Dict(my_spaces)
+        # self.observation_space = spaces.Discrete(self.nS)
         self.action_space = spaces.Discrete(self.nA)
 
         # Initialise env dynamics
@@ -216,11 +232,11 @@ class SimpleGridEnv(Env):
         for row in range(nrow):
             for col in range(ncol):
                 letter = desc[row, col]
-                if letter == b'G':
+                if letter == b"G":
                     grid.set(col, row, Goal())
-                elif letter == b'W':
+                elif letter == b"W":
                     grid.set(col, row, Wall(color='black'))
-                elif letter == b'L':
+                elif letter == b"L":
                     grid.set(col, row, Lava())
                 else:
                     grid.set(col, row, None)
@@ -347,11 +363,11 @@ class SimpleGridEnv(Env):
         state = self.s
         col = state % self.ncol
         row = state // self.ncol
-        left = b"O" if col == 0 else self.desc[row][col-1]
-        down = b"O" if row == self.nrow - 1 else self.desc[row+1][col]
-        up = b"O" if row == 0 else self.desc[row-1][col]
-        right = b"O" if col == self.ncol - 1 else self.desc[row][col+1]
-        return [left, down, right, up, self.desc[row][col]]
+        left = "O" if col == 0 else self.desc[row][col-1].decode("utf-8")
+        down = "O" if row == self.nrow - 1 else self.desc[row+1][col].decode("utf-8")
+        up = "O" if row == 0 else self.desc[row-1][col].decode("utf-8")
+        right = "O" if col == self.ncol - 1 else self.desc[row][col+1].decode("utf-8")
+        return left, down, right, up, self.desc[row][col].decode("utf-8")
 
     def step(self, a):
         transitions = self.P[self.s][a]
@@ -359,7 +375,7 @@ class SimpleGridEnv(Env):
         p, s, r, d = transitions[i]
         self.s = s
         self.lastaction = a
-        return [int(s), self.__get_observation_in_range()], r, d, d , {"prob": p}
+        return {"position": int(self.s), "local_observation": self.__get_observation_in_range()}, r, d, d , {"prob": p}
 
     def reset(
         self,
@@ -381,9 +397,9 @@ class SimpleGridEnv(Env):
         self.lastaction = None
 
         if not return_info:
-            return [int(self.s), self.__get_observation_in_range()]
+            return {"position": int(self.s), "local_observation": self.__get_observation_in_range()}
         else:
-            return [int(self.s), self.__get_observation_in_range()], {"prob": 1}
+            return {"position": int(self.s), "local_observation": self.__get_observation_in_range()}, {"prob": 1}
 
     def render(self, mode="human"):
         if mode == "ansi":

@@ -16,7 +16,7 @@ map = [
 
 env = gym.make('SimpleGrid-v0', desc = map)
 
-nb_states = env.observation_space.n
+nb_states = env.observation_space.__getitem__("position").n
 nb_actions = env.action_space.n
 qtable = np.zeros((nb_states, nb_actions))
 
@@ -51,7 +51,7 @@ for e in range(episodes):
             action = env.action_space.sample()
         # Else, take the action with the highest value in the current state
         else:
-            action = np.argmax(qtable[state[0]])
+            action = np.argmax(qtable[state["position"]])
 
 
 
@@ -60,8 +60,9 @@ for e in range(episodes):
 
         # Update Q(s,a)
 
-        qtable[state[0], action] = qtable[state[0], action] + \
-                                alpha * (reward + gamma * np.max(qtable[new_state[0]]) - qtable[state[0], action])
+        # print(state)
+        qtable[state["position"], action] = qtable[state["position"], action] + \
+                                alpha * (reward + gamma * np.max(qtable[new_state["position"]]) - qtable[state["position"], action])
 
         # Update our current state
         state = new_state
@@ -89,8 +90,8 @@ done = False
 
 while not done:
     # Choose the action with the highest value in the current state
-    if np.max(qtable[state[0]]) > 0:
-        action = np.argmax(qtable[state[0]])
+    if np.max(qtable[state["position"]]) > 0:
+        action = np.argmax(qtable[state["position"]])
 
     # If there's no best action (only zeros), take a random one
     else:
