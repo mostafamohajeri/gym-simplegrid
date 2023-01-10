@@ -5,7 +5,7 @@ import gym_simplegrid
 import gym_simplegrid.envs.mas_simple_grid
 
 # env = gym.make('MASSimpleGrid-8x8-v0')
-env = gym_simplegrid.envs.mas_simple_grid.env(map_name="8x8", num_agents=3)
+env = gym_simplegrid.envs.mas_simple_grid.env(map, num_agents=1)
 
 state = env.reset()
 done = False

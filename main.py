@@ -3,7 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gym_simplegrid
 
-env = gym.make('SimpleGrid-8x8-v0')
+map = [
+        "SEEELLEE",
+        "EEEEEEEE",
+        "EELWEEEE",
+        "EELEEWEE",
+        "EEEWEEEE",
+        "EWWEEEWE",
+        "EWEEWLWE",
+        "EEEWEEEG",
+    ]
+
+env = gym.make('SimpleGrid-v0', desc = map)
 
 nb_states = env.observation_space.n
 nb_actions = env.action_space.n
@@ -40,14 +51,17 @@ for e in range(episodes):
             action = env.action_space.sample()
         # Else, take the action with the highest value in the current state
         else:
-            action = np.argmax(qtable[state])
+            action = np.argmax(qtable[state[0]])
+
+
 
         # Implement this action and move the agent in the desired direction
         new_state, reward, done, trunc, info = env.step(action)
-
+        print(new_state)
         # Update Q(s,a)
-        qtable[state, action] = qtable[state, action] + \
-                                alpha * (reward + gamma * np.max(qtable[new_state]) - qtable[state, action])
+
+        qtable[state[0], action] = qtable[state[0], action] + \
+                                alpha * (reward + gamma * np.max(qtable[new_state[0]]) - qtable[state[0], action])
 
         # Update our current state
         state = new_state
@@ -75,8 +89,8 @@ done = False
 
 while not done:
     # Choose the action with the highest value in the current state
-    if np.max(qtable[state]) > 0:
-        action = np.argmax(qtable[state])
+    if np.max(qtable[state[0]]) > 0:
+        action = np.argmax(qtable[state[0]])
 
     # If there's no best action (only zeros), take a random one
     else:

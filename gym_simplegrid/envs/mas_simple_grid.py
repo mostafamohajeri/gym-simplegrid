@@ -31,6 +31,16 @@ MAPS = {
         "EWEEWLWE",
         "EEEWEEEG",
     ],
+    "8x8LavaWorld": [
+        "SELLLLLLEE",
+        "EELLLLLLEE",
+        "EELLLLLLEE",
+        "EEEEEEEEEE",
+        "EELLLLLLEE",
+        "EELLLLLLEG",
+        "EEEEEEEEEE",
+        "EELLLLLLEE",
+    ],
 }
 
 REWARD_MAP = {

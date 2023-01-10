@@ -343,13 +343,23 @@ class SimpleGridEnv(Env):
                             li.append((1.0, *self.__transition(row, col, a)))
         return P
 
+    def __get_observation_in_range(self):
+        state = self.s
+        col = state % self.ncol
+        row = state // self.ncol
+        left = b"O" if col == 0 else self.desc[row][col-1]
+        down = b"O" if row == self.nrow - 1 else self.desc[row+1][col]
+        up = b"O" if row == self.nrow == 0 else self.desc[row-1][col]
+        right = b"O" if col == self.ncol - 1 else self.desc[row][ col+1 ]
+        return [left, down, right, up, self.desc[row][col]]
+
     def step(self, a):
         transitions = self.P[self.s][a]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         p, s, r, d = transitions[i]
         self.s = s
         self.lastaction = a
-        return (int(s), r, d, d , {"prob": p})
+        return [int(s), self.__get_observation_in_range()], r, d, d , {"prob": p}
 
     def reset(
         self,
@@ -373,7 +383,7 @@ class SimpleGridEnv(Env):
         if not return_info:
             return int(self.s)
         else:
-            return int(self.s), {"prob": 1}
+            return [int(self.s), self.__get_observation_in_range()], {"prob": 1}
 
     def render(self, mode="human"):
         if mode == "ansi":
