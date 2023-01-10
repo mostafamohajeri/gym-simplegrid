@@ -37,7 +37,7 @@ outcomes = np.zeros(episodes)
 for e in range(episodes):
     state, info = env.reset()
     done = False
-
+    print(state)
     # By default, we consider our outcome to be a failure
     outcomes[e] = 0
     steps = 0
@@ -57,7 +57,7 @@ for e in range(episodes):
 
         # Implement this action and move the agent in the desired direction
         new_state, reward, done, trunc, info = env.step(action)
-        print(new_state)
+
         # Update Q(s,a)
 
         qtable[state[0], action] = qtable[state[0], action] + \

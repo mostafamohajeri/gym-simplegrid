@@ -381,7 +381,7 @@ class SimpleGridEnv(Env):
         self.lastaction = None
 
         if not return_info:
-            return int(self.s)
+            return [int(self.s), self.__get_observation_in_range()]
         else:
             return [int(self.s), self.__get_observation_in_range()], {"prob": 1}
 
