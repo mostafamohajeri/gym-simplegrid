@@ -38,6 +38,7 @@ for e in range(episodes):
     state, info = env.reset()
     done = False
     print(state)
+    print(type(state))
     # By default, we consider our outcome to be a failure
     outcomes[e] = 0
     steps = 0
