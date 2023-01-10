@@ -349,8 +349,8 @@ class SimpleGridEnv(Env):
         row = state // self.ncol
         left = b"O" if col == 0 else self.desc[row][col-1]
         down = b"O" if row == self.nrow - 1 else self.desc[row+1][col]
-        up = b"O" if row == self.nrow == 0 else self.desc[row-1][col]
-        right = b"O" if col == self.ncol - 1 else self.desc[row][ col+1 ]
+        up = b"O" if row == 0 else self.desc[row-1][col]
+        right = b"O" if col == self.ncol - 1 else self.desc[row][col+1]
         return [left, down, right, up, self.desc[row][col]]
 
     def step(self, a):
